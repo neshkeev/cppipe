@@ -1,4 +1,5 @@
 #include <cppipe.h>
+#include <cassert>
 
 using namespace cppipe;
 
@@ -16,5 +17,7 @@ int main(int argc, char** argv)
     [](auto&& i) { return ""; },
     [](auto&& err) { return err; });
 
-  return res == "negative value" ? 0 : 1;
+  assert(res == "negative value");
+
+  return 0;
 }

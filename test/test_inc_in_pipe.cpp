@@ -1,4 +1,5 @@
 #include <cppipe.h>
+#include <cassert>
 
 using namespace cppipe;
 
@@ -15,5 +16,7 @@ int main(int argc, char** argv)
     [](auto&& i) { return i; },
     [](auto&& err) { return -1; });
 
-  return res == 4 ? 0 : 1;
+  assert(res == 4);
+
+  return 0;
 }
