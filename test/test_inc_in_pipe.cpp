@@ -3,14 +3,18 @@
 
 using namespace cppipe;
 
+constexpr Result<int> twice(const int i)
+{
+  return i * 2;
+}
+
 int main(int argc, char** argv)
 {
-  Result<int> start = 1;
+  const Result<int> start = 1;
   auto inc = [](auto&& i) -> Result<int> { return i + 1; };
   Result<int> success = start
-    >> [](auto&& i) -> Result<int> { return i * 2; }
     >> inc
-    >> inc;
+    >> twice;
 
   int res = run(success,
     [](auto&& i) { return i; },

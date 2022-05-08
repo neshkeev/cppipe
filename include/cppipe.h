@@ -20,16 +20,20 @@ namespace cppipe {
 
   template<class T, class E = Error, class F>
     requires FlatMap<T, F>
-  [[nodiscard]] auto operator>>(Result<T, E>& a, F fun) noexcept
-    -> decltype(fun(std::get<T>(a)))
+  [[nodiscard]] auto operator>>(const Result<T, E>& a, F fun) noexcept
+    -> decltype(fun(std::get<1>(a)))
   {
-    const auto visitor = [&fun](auto&& arg) -> decltype(fun(std::get<T>(a))) {
+    using ResultType = decltype(fun(std::get<1>(a)));
+    const auto visitor = [&fun](auto&& arg) -> ResultType {
       using A = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<A, std::decay_t<T>>) {
         return fun(std::forward<decltype(arg)>(arg));
       }
       else {
-        return std::forward<decltype(arg)>(arg);
+        enum Tag { Err = 0, Val };
+        using ValueType = std::variant_alternative_t<Tag::Val, ResultType>;
+        using ErrorType = std::variant_alternative_t<Tag::Err, ResultType>;
+        return Result<ValueType, ErrorType> { std::in_place_index<0>, std::forward<decltype(arg)>(arg) };
       }
     };
 
@@ -39,15 +43,19 @@ namespace cppipe {
   template<class T, class E = Error, class F>
     requires FlatMap<T, F>
   [[nodiscard]] auto operator>>(Result<T>&& a, F fun) noexcept
-    -> decltype(fun(std::get<T>(a)))
+    -> decltype(fun(std::get<1>(a)))
   {
-    const auto visitor = [&fun](auto&& arg) -> decltype(fun(std::get<T>(a))) {
+    using ResultType = decltype(fun(std::get<1>(a)));
+    const auto visitor = [&fun](auto&& arg) -> decltype(fun(std::get<1>(a))) {
       using A = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<A, std::decay_t<T>>) {
         return fun(std::forward<decltype(arg)>(arg));
       }
       else {
-        return std::forward<decltype(arg)>(arg);
+        enum Tag { Err = 0, Val };
+        using ValueType = std::variant_alternative_t<Tag::Val, ResultType>;
+        using ErrorType = std::variant_alternative_t<Tag::Err, ResultType>;
+        return Result<ValueType, ErrorType> { std::in_place_index<0>, std::forward<decltype(arg)>(arg) };
       }
     };
 
@@ -66,9 +74,9 @@ namespace cppipe {
   template<class T, class E = Error, class Success, class Failure>
     requires ResultHandler<T, E, Success, Failure>
   [[nodiscard]] auto run(Result<T>& a, Success s, Failure f) noexcept
-    -> std::common_type_t<decltype(s(std::get<T>(a))), decltype(f(std::get<E>(a)))>
+    -> std::common_type_t<decltype(s(std::get<1>(a))), decltype(f(std::get<0>(a)))>
   {
-    using Ret = std::common_type_t<decltype(s(std::get<T>(a))), decltype(f(std::get<E>(a)))>;
+    using Ret = std::common_type_t<decltype(s(std::get<1>(a))), decltype(f(std::get<0>(a)))>;
 
     const auto visitor = [&s, &f](auto&& arg) -> Ret
     {

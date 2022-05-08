@@ -3,6 +3,8 @@
 
 using namespace cppipe;
 
+std::string_view neg_value_msg = "negative value";
+
 int main(int argc, char** argv)
 {
   Result<int> start = 1;
@@ -10,14 +12,13 @@ int main(int argc, char** argv)
   Result<int> failure = start
     >> dec
     >> dec
-    >> [](auto&& i) { return i < 0 ? Result<int> { "negative value" } : i; }
+    >> [](auto&& i) { return i < 0 ? Result<int> { neg_value_msg } : i; }
     >> dec;
 
-  std::string_view res = run(failure,
-    [](auto&& i) { return ""; },
-    [](auto&& err) { return err; });
-
-  assert(res == "negative value");
+  run(failure,
+    [](auto&& i) { assert(false); },
+    [](auto&& err) { assert(err == neg_value_msg); }
+  );
 
   return 0;
 }
