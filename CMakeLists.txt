@@ -14,3 +14,4 @@ add_subdirectory(test)
 install(FILES include/cppipe.h DESTINATION include)
 
 include(cmake/cppipeInstall.cmake)
+include(cmake/cppipePack.cmake)
