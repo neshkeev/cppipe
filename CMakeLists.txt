@@ -12,3 +12,5 @@ enable_testing()
 add_subdirectory(test)
 
 install(FILES include/cppipe.h DESTINATION include)
+
+include(cmake/cppipeInstall.cmake)
